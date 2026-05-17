@@ -1,0 +1,163 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── STAFF USERS ───────────────────────────────────────────────────────────────
+
+model User {
+  id           String       @id @default(uuid())
+  fullName     String       @map("full_name")
+  email        String       @unique
+  passwordHash String       @map("password_hash")
+  role         Role         @default(operations)
+  createdAt    DateTime     @default(now()) @map("created_at")
+  production   Production[]
+  expenses     Expense[]
+
+  @@map("users")
+}
+
+model Production {
+  id             String   @id @default(uuid())
+  date           DateTime
+  bagsProduced   Int      @map("bags_produced")
+  bagsSold       Int      @map("bags_sold")
+  damagedBags    Int      @default(0) @map("damaged_bags")
+  remainingStock Int      @map("remaining_stock")
+  sellingPrice   Float    @map("selling_price")
+  totalSales     Float    @map("total_sales")
+  userId         String   @map("created_by")
+  createdAt      DateTime @default(now()) @map("created_at")
+  user           User     @relation(fields: [userId], references: [id])
+
+  @@map("production")
+}
+
+model Expense {
+  id          String      @id @default(uuid())
+  date        DateTime
+  expenseType ExpenseType @map("expense_type")
+  amount      Float
+  description String?
+  userId      String      @map("created_by")
+  createdAt   DateTime    @default(now()) @map("created_at")
+  user        User        @relation(fields: [userId], references: [id])
+
+  @@map("expenses")
+}
+
+// ─── CUSTOMER FACING TABLES ────────────────────────────────────────────────────
+
+model Customer {
+  id              String    @id @default(uuid())
+  fullName        String    @map("full_name")
+  email           String    @unique
+  phone           String
+  passwordHash    String    @map("password_hash")
+  deliveryAddress String?   @map("delivery_address")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  orders          Order[]
+  payments        Payment[]
+
+  @@map("customers")
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  sizeKg      Float    @map("size_kg")
+  price       Float
+  isAvailable Boolean  @default(true) @map("is_available")
+  createdAt   DateTime @default(now()) @map("created_at")
+  orders      Order[]
+
+  @@map("products")
+}
+
+model Order {
+  id                  String         @id @default(uuid())
+  customerId          String         @map("customer_id")
+  productId           String         @map("product_id")
+  quantity            Int
+  totalAmount         Float          @map("total_amount")
+  deliveryMethod      DeliveryMethod @map("delivery_method")
+  deliveryAddress     String?        @map("delivery_address")
+  orderStatus         OrderStatus    @default(pending) @map("order_status")
+  paymentStatus       PaymentStatus  @default(unpaid) @map("payment_status")
+  specialInstructions String?        @map("special_instructions")
+  createdAt           DateTime       @default(now()) @map("created_at")
+  updatedAt           DateTime       @updatedAt @map("updated_at")
+  customer            Customer       @relation(fields: [customerId], references: [id])
+  product             Product        @relation(fields: [productId], references: [id])
+  payments            Payment[]
+
+  @@map("orders")
+}
+
+model Payment {
+  id                   String        @id @default(uuid())
+  orderId              String        @map("order_id")
+  customerId           String        @map("customer_id")
+  amount               Float
+  paymentMethod        PaymentMethod @map("payment_method")
+  transactionReference String?       @unique @map("transaction_reference")
+  paymentStatus        PaymentStatus @map("payment_status")
+  paidAt               DateTime?     @map("paid_at")
+  createdAt            DateTime      @default(now()) @map("created_at")
+  order                Order         @relation(fields: [orderId], references: [id])
+  customer             Customer      @relation(fields: [customerId], references: [id])
+
+  @@map("payments")
+}
+
+// ─── ENUMS ─────────────────────────────────────────────────────────────────────
+
+enum Role {
+  super_admin
+  operations
+  delivery
+}
+
+enum ExpenseType {
+  fuel
+  electricity
+  water
+  nylon
+  transportation
+  labor
+  maintenance
+  miscellaneous
+}
+
+enum DeliveryMethod {
+  delivery
+  pickup
+}
+
+enum OrderStatus {
+  pending
+  confirmed
+  processing
+  out_for_delivery
+  delivered
+  cancelled
+}
+
+enum PaymentStatus {
+  unpaid
+  paid
+  failed
+  refunded
+}
+
+enum PaymentMethod {
+  card
+  bank_transfer
+  ussd
+  cash
+}
