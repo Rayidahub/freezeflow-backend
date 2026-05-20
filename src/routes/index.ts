@@ -4,6 +4,7 @@
 import { Router, Request, Response } from 'express';
 import authRoutes       from './auth.routes';
 import productionRoutes from './production.routes';
+import expenseRoutes    from './expense.routes';
 
 const router = Router();
 
@@ -13,16 +14,16 @@ router.get('/health', (_req: Request, res: Response) => {
     status: 'ok',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    version: '2.0.0',
+    version: '3.0.0',
   });
 });
 
 // ─── Feature Routes ───────────────────────────────────────────────────────────
 router.use('/auth',       authRoutes);
 router.use('/production', productionRoutes);
+router.use('/expenses',   expenseRoutes);
 
 // Stubs for future sprints:
-// router.use('/expenses',  expenseRoutes);
 // router.use('/products',  productRoutes);
 // router.use('/orders',    orderRoutes);
 // router.use('/customers', customerRoutes);
