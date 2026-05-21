@@ -4,43 +4,41 @@
 export type UserRole = 'super_admin' | 'operations' | 'delivery';
 
 export type ExpenseType =
-  | 'fuel'
-  | 'electricity'
-  | 'water'
-  | 'nylon'
-  | 'transportation'
-  | 'labor'
-  | 'maintenance'
-  | 'miscellaneous';
+  | 'fuel' | 'electricity' | 'water' | 'nylon'
+  | 'transportation' | 'labor' | 'maintenance' | 'miscellaneous';
 
-export type DeliveryMethod = 'delivery' | 'pickup';
+export type DeliveryMethod  = 'delivery' | 'pickup';
+export type OrderStatus     = 'pending' | 'confirmed' | 'processing' | 'out_for_delivery' | 'delivered' | 'cancelled';
+export type PaymentStatus   = 'unpaid' | 'paid' | 'failed' | 'refunded';
+export type PaymentMethod   = 'card' | 'bank_transfer' | 'ussd' | 'cash';
 
-export type OrderStatus =
-  | 'pending'
-  | 'confirmed'
-  | 'processing'
-  | 'out_for_delivery'
-  | 'delivered'
-  | 'cancelled';
+// ─── Staff JWT payload ────────────────────────────────────────────────────────
 
-export type PaymentStatus = 'unpaid' | 'paid' | 'failed' | 'refunded';
-
-export type PaymentMethod = 'card' | 'bank_transfer' | 'ussd' | 'cash';
-
-// JWT payload shape
 export interface JwtPayload {
   userId: string;
-  email: string;
-  role: UserRole;
-  iat?: number;
-  exp?: number;
+  email:  string;
+  role:   UserRole;
+  iat?:   number;
+  exp?:   number;
 }
 
-// Augment Express Request to carry the decoded user
+// ─── Customer JWT payload ─────────────────────────────────────────────────────
+
+export interface CustomerJwtPayload {
+  customerId: string;
+  email:      string;
+  type:       'customer';
+  iat?:       number;
+  exp?:       number;
+}
+
+// ─── Express Request augmentation ────────────────────────────────────────────
+
 declare global {
   namespace Express {
     interface Request {
-      user?: JwtPayload;
+      user?:     JwtPayload;
+      customer?: CustomerJwtPayload;
     }
   }
 }
@@ -49,31 +47,52 @@ declare global {
 
 export interface RegisterDto {
   fullName: string;
-  email: string;
+  email:    string;
   password: string;
-  role?: UserRole;
+  role?:    UserRole;
 }
 
 export interface LoginDto {
-  email: string;
+  email:    string;
   password: string;
 }
 
 export interface AuthResponse {
   token: string;
   user: {
-    id: string;
+    id:       string;
     fullName: string;
-    email: string;
-    role: UserRole;
+    email:    string;
+    role:     UserRole;
+  };
+}
+
+// ─── Customer Auth DTOs ───────────────────────────────────────────────────────
+
+export interface CustomerRegisterDto {
+  fullName:        string;
+  email:           string;
+  phone:           string;
+  password:        string;
+  deliveryAddress?: string;
+}
+
+export interface CustomerAuthResponse {
+  token:    string;
+  customer: {
+    id:               string;
+    fullName:         string;
+    email:            string;
+    phone:            string;
+    deliveryAddress?: string | null;
   };
 }
 
 // ─── API Response wrapper ─────────────────────────────────────────────────────
 
 export interface ApiResponse<T = unknown> {
-  success: boolean;
+  success:  boolean;
   message?: string;
-  data?: T;
-  errors?: string[];
+  data?:    T;
+  errors?:  string[];
 }
