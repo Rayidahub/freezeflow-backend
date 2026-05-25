@@ -16,8 +16,9 @@ model User {
   passwordHash String       @map("password_hash")
   role         Role         @default(operations)
   createdAt    DateTime     @default(now()) @map("created_at")
-  production   Production[]
-  expenses     Expense[]
+  production           Production[]
+  expenses             Expense[]
+  deliveryAssignments  DeliveryAssignment[]
 
   @@map("users")
 }
@@ -95,6 +96,8 @@ model Order {
   customer            Customer       @relation(fields: [customerId], references: [id])
   product             Product        @relation(fields: [productId], references: [id])
   payments            Payment[]
+  deliveryAssignment  DeliveryAssignment?
+  statusHistory       OrderStatusHistory[]
 
   @@map("orders")
 }
@@ -160,4 +163,31 @@ enum PaymentMethod {
   bank_transfer
   ussd
   cash
+}
+
+// ─── SPRINT 6: DELIVERY & STATUS HISTORY ─────────────────────────────────────
+
+model DeliveryAssignment {
+  id              String   @id @default(uuid())
+  orderId         String   @unique @map("order_id")
+  deliveryStaffId String   @map("delivery_staff_id")
+  assignedAt      DateTime @default(now()) @map("assigned_at")
+  completedAt     DateTime? @map("completed_at")
+  notes           String?
+  order           Order    @relation(fields: [orderId], references: [id])
+  deliveryStaff   User     @relation(fields: [deliveryStaffId], references: [id])
+
+  @@map("delivery_assignments")
+}
+
+model OrderStatusHistory {
+  id          String      @id @default(uuid())
+  orderId     String      @map("order_id")
+  status      OrderStatus
+  changedById String?     @map("changed_by_id")
+  note        String?
+  createdAt   DateTime    @default(now()) @map("created_at")
+  order       Order       @relation(fields: [orderId], references: [id])
+
+  @@map("order_status_history")
 }

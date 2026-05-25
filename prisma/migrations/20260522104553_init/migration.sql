@@ -115,6 +115,30 @@ CREATE TABLE "payments" (
     CONSTRAINT "payments_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "delivery_assignments" (
+    "id" TEXT NOT NULL,
+    "order_id" TEXT NOT NULL,
+    "delivery_staff_id" TEXT NOT NULL,
+    "assigned_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "completed_at" TIMESTAMP(3),
+    "notes" TEXT,
+
+    CONSTRAINT "delivery_assignments_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "order_status_history" (
+    "id" TEXT NOT NULL,
+    "order_id" TEXT NOT NULL,
+    "status" "OrderStatus" NOT NULL,
+    "changed_by_id" TEXT,
+    "note" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "order_status_history_pkey" PRIMARY KEY ("id")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "users_email_key" ON "users"("email");
 
@@ -123,6 +147,9 @@ CREATE UNIQUE INDEX "customers_email_key" ON "customers"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "payments_transaction_reference_key" ON "payments"("transaction_reference");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "delivery_assignments_order_id_key" ON "delivery_assignments"("order_id");
 
 -- AddForeignKey
 ALTER TABLE "production" ADD CONSTRAINT "production_created_by_fkey" FOREIGN KEY ("created_by") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -141,3 +168,12 @@ ALTER TABLE "payments" ADD CONSTRAINT "payments_order_id_fkey" FOREIGN KEY ("ord
 
 -- AddForeignKey
 ALTER TABLE "payments" ADD CONSTRAINT "payments_customer_id_fkey" FOREIGN KEY ("customer_id") REFERENCES "customers"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "delivery_assignments" ADD CONSTRAINT "delivery_assignments_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "delivery_assignments" ADD CONSTRAINT "delivery_assignments_delivery_staff_id_fkey" FOREIGN KEY ("delivery_staff_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "order_status_history" ADD CONSTRAINT "order_status_history_order_id_fkey" FOREIGN KEY ("order_id") REFERENCES "orders"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

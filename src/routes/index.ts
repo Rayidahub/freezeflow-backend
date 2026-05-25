@@ -7,6 +7,7 @@ import customerRoutes    from './customer.routes';
 import productRoutes     from './product.routes';
 import orderRoutes       from './order.routes';
 import paymentRoutes     from './payment.routes';
+import deliveryRoutes    from './delivery.routes';
 
 const router = Router();
 
@@ -15,7 +16,7 @@ router.get('/health', (_req: Request, res: Response) => {
     status:      'ok',
     timestamp:   new Date().toISOString(),
     environment: process.env.NODE_ENV,
-    version:     '5.0.0',
+    version:     '6.0.0',
   });
 });
 
@@ -26,5 +27,6 @@ router.use('/customers',  customerRoutes);
 router.use('/products',   productRoutes);
 router.use('/orders',     orderRoutes);
 router.use('/payments',   paymentRoutes);
+router.use('/delivery',   deliveryRoutes);
 
 export default router;
