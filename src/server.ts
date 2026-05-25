@@ -9,7 +9,9 @@ import morgan from 'morgan';
 
 import routes from './routes';
 import { errorHandler, notFound } from './middleware/errorHandler';
-
+import adminRoutes from './routes/admin.routes';
+// ... after other app.use
+//app.use('/api/admin', adminRoutes);
 const app: Application = express();
 const PORT = parseInt(process.env.PORT || '5000', 10);
 
